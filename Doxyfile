@@ -1,0 +1,29 @@
+# Doxyfile configuration for Rust project
+
+# Project information
+PROJECT_NAME           = "Tamagotchi"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "A virtual pet game"
+OUTPUT_DIRECTORY       = docs
+CREATE_SUBDIRS         = YES
+
+# Source code configuration
+INPUT                  = gtk-tamagotchi/src
+FILE_PATTERNS          = *.rs
+RECURSIVE              = YES
+
+# Configuration options
+GENERATE_HTML          = YES
+GENERATE_MAN           = NO
+GENERATE_LATEX         = NO
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# Other options
+EXCLUDE_SYMLINKS       = YES
+SHOW_INCLUDE_FILES     = YES
+QUIET                  = YES
+WARNINGS               = YES
+
+# End of file

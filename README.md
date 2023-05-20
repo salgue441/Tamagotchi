@@ -17,9 +17,9 @@ To run the GTK Tamagotchi program, follow these steps:
 cargo run
 ```
 
-5. Interact with the Tamagotchi program through the GUI interface.
-   Use the provided buttons, menus, or input fields to perform actions
-   and take care of your virtual pet.
+5.Interact with the Tamagotchi program through the GUI interface.
+Use the provided buttons, menus, or input fields to perform actions
+and take care of your virtual pet.
 
 ## Dependencies
 
