@@ -1,104 +1,82 @@
+// Standard library
+use std::cell::RefCell;
+use std::rc::Rc;
+
 // GTK
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Button, Label, Orientation, SpinButton, WindowPosition};
+use gtk::{Application, ApplicationWindow, Button, Label};
 
-/// Represents a Tamagotchi
-struct Tamagotchi {
-    name: String,
-    age: u8,
-    hunger: u8,
-    happiness: u8,
-    health: u8,
-    weight: u8,
-    is_alive: bool,
-}
-
-impl Tamagotchi {
-    /// Creates a new Tamagotchi
-    fn new() -> self {
-        Tamagotchi {
-            name: String::from(""),
-            age: 0,
-            hunger: 0,
-            happiness: 0,
-            health: 0,
-            weight: 0,
-            is_alive: true,
-        }
-    }
-
-    /// Feeds the Tamagotchi, decreasing its hunger and increasing its weight
-    fn feed(&mut self) {
-        self.hunger -= 1;
-        self.weight += 1;
-    }
-
-    /// Plays with the Tamagotchi, increasing its happiness and decreasing its weight
-    fn play(&mut self) {
-        self.happiness += 1;
-        self.weight -= 1;
-    }
-
-    /// Puts the Tamagotchi to sleep, decreasing happiness and increasing health.
-    fn sleep(&mut self) {
-        self.happiness -= 1;
-        self.health += 1;
-    }
-
-    /// Updates the Tamagotchi's state based on time passing.
-    fn update(&mut self) {
-        self.age += 1;
-        self.hunger += 1;
-        self.happiness -= 1;
-        self.health -= 1;
-        self.weight -= 1;
-
-        if self.hunger > 10 || self.happiness > 10 || self.health > 10 || self.weight > 10 {
-            self.is_alive = false;
-        }
-    }
-
-    /// Checks if the Tamagotchi is alive.
-    ///
-    /// Returns `true` if the Tamagotchi is alive, `false` otherwise.
-    fn is_alive(&self) -> bool {
-        self.is_alive
-    }
-
-    /// Retrieves the name of the Tamagotchi.
-    ///
-    /// Returns the name of the Tamagotchi as a `String`.
-    fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    /// Sets the name of the Tamagotchi.
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The new name for the Tamagotchi.
-    fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-}
+// Project files
+mod tamagotchi;
+use tamagotchi::Tamagotchi;
 
 fn main() {
-    gtk::init().expect("Failed to initialize GTK...");
+    let application = Application::builder()
+        .application_id("carlossalguero.gtk-tamagotchi")
+        .build();
 
-    let app = Application::new(
-        Some("com.carlossalguero.gtk-tamagotchi"),
-        Default::default(),
-    )
-    .expect("Failed to create GTK Application...");
+    application.connect_activate(|app| {
+        let window = ApplicationWindow::builder()
+            .application(app)
+            .title("Tamagotchi")
+            .default_width(800)
+            .default_height(600)
+            .build();
 
-    app.connect_activate(|app| {
-        let window = ApplicationWindow::new(app);
+        let tamagotchi = Rc::new(RefCell::new(Tamagotchi::new()));
 
-        window.set_title("Tamagotchi");
-        window.set_default_size(800, 600);
+        // Creating the UI
+        let label_name = Label::new(Some(&tamagotchi.borrow().get_name()));
 
+        let label_age = Rc::new(RefCell::new(Label::new(Some(
+            &tamagotchi.borrow().get_age().to_string(),
+        ))));
+
+        let button_feed = Button::with_label("Feed");
+        let button_play = Button::with_label("Play");
+        let button_sleep = Button::with_label("Sleep");
+
+        let grid = gtk::Grid::new();
+
+        // Connecting the signals
+        let tamagotchi_clone = tamagotchi.clone();
+        let label_age_clone = label_age.clone();
+        button_feed.connect_clicked(move |_| {
+            tamagotchi_clone.borrow_mut().feed();
+            label_age_clone
+                .borrow_mut()
+                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        });
+
+        let tamagotchi_clone = tamagotchi.clone();
+        let label_age_clone = label_age.clone();
+        button_play.connect_clicked(move |_| {
+            tamagotchi_clone.borrow_mut().play();
+            label_age_clone
+                .borrow_mut()
+                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        });
+
+        let tamagotchi_clone = tamagotchi.clone();
+        let label_age_clone = label_age.clone();
+        button_sleep.connect_clicked(move |_| {
+            tamagotchi_clone.borrow_mut().sleep();
+            label_age_clone
+                .borrow_mut()
+                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        });
+
+        // Add widget to the window
+        grid.attach(&label_name, 0, 0, 1, 1);
+
+        grid.attach(&button_feed, 0, 2, 1, 1);
+        grid.attach(&button_play, 0, 3, 1, 1);
+        grid.attach(&button_sleep, 0, 4, 1, 1);
+
+        // Show the window
+        window.add(&grid);
         window.show_all();
     });
 
-    app.run(&[]);
+    application.run();
 }
