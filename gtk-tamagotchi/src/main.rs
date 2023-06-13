@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 // GTK
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Button, Label};
+use gtk::{Align, Application, ApplicationWindow, Button, Grid};
 
 // Project files
 mod tamagotchi;
@@ -23,58 +23,52 @@ fn main() {
             .default_height(600)
             .build();
 
+        // Modifiable structure object
         let tamagotchi = Rc::new(RefCell::new(Tamagotchi::new()));
 
-        // Creating the UI
-        let label_name = Label::new(Some(&tamagotchi.borrow().get_name()));
+        // Create a grid
+        let grid = Grid::new();
+        grid.set_row_spacing(10);
+        grid.set_column_spacing(10);
 
-        let label_age = Rc::new(RefCell::new(Label::new(Some(
-            &tamagotchi.borrow().get_age().to_string(),
-        ))));
-
-        let button_feed = Button::with_label("Feed");
-        let button_play = Button::with_label("Play");
-        let button_sleep = Button::with_label("Sleep");
-
-        let grid = gtk::Grid::new();
-
-        // Connecting the signals
-        let tamagotchi_clone = tamagotchi.clone();
-        let label_age_clone = label_age.clone();
-        button_feed.connect_clicked(move |_| {
-            tamagotchi_clone.borrow_mut().feed();
-            label_age_clone
-                .borrow_mut()
-                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        // Feed, Play, sleep buttons
+        let feed_button = Button::with_label("Feed");
+        feed_button.set_halign(Align::Center);
+        feed_button.connect_clicked({
+            let tamagotchi = Rc::clone(&tamagotchi);
+            move |_| {
+                tamagotchi.borrow_mut().feed();
+            }
         });
 
-        let tamagotchi_clone = tamagotchi.clone();
-        let label_age_clone = label_age.clone();
-        button_play.connect_clicked(move |_| {
-            tamagotchi_clone.borrow_mut().play();
-            label_age_clone
-                .borrow_mut()
-                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        let play_button = Button::with_label("Play");
+        play_button.set_halign(Align::Center);
+        play_button.connect_clicked({
+            let tamagotchi = Rc::clone(&tamagotchi);
+            move |_| {
+                tamagotchi.borrow_mut().play();
+            }
         });
 
-        let tamagotchi_clone = tamagotchi.clone();
-        let label_age_clone = label_age.clone();
-        button_sleep.connect_clicked(move |_| {
-            tamagotchi_clone.borrow_mut().sleep();
-            label_age_clone
-                .borrow_mut()
-                .set_text(&tamagotchi_clone.borrow().get_age().to_string());
+        let sleep_button = Button::with_label("Sleep");
+        sleep_button.set_halign(Align::Center);
+        sleep_button.connect_clicked({
+            let tamagotchi = Rc::clone(&tamagotchi);
+            move |_| {
+                tamagotchi.borrow_mut().sleep();
+            }
         });
 
-        // Add widget to the window
-        grid.attach(&label_name, 0, 0, 1, 1);
+        // Add buttons to grid
+        grid.attach(&feed_button, 0, 0, 1, 1);
+        grid.attach(&play_button, 1, 0, 1, 1);
+        grid.attach(&sleep_button, 2, 0, 1, 1);
 
-        grid.attach(&button_feed, 0, 2, 1, 1);
-        grid.attach(&button_play, 0, 3, 1, 1);
-        grid.attach(&button_sleep, 0, 4, 1, 1);
+        // Add grid to window
+        let vbox = gtk::Box::new(gtk::Orientation::Vertical, 0);
+        vbox.pack_end(&grid, false, false, 0);
 
-        // Show the window
-        window.add(&grid);
+        window.add(&vbox);
         window.show_all();
     });
 
